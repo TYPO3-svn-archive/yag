@@ -1,0 +1,77 @@
+{namespace yag=Tx_Yag_ViewHelpers}
+{namespace extlist=Tx_PtExtlist_ViewHelpers}
+{namespace rbac=Tx_Rbac_ViewHelpers}
+
+<extlist:comment>
+<!--  
+Partial for rendering import form for directory importer
+
+Here is a list of objects / variables that can be accessed in this template:
+
+Tx_Yag_Domain_Model_Album album               The album object
+
+@package YAG
+@author Michael Knoll <knoll@punkt.de>
+@author Daniel Lienert <lienert@punkt.de>
+-->
+</extlist:comment>
+
+
+
+<style>
+    .ui-autocomplete-loading { background: white url('fileadmin/jquery/images/ui-anim_basic_16x16.gif') right center no-repeat; }
+    #city { width: 25em; }
+</style>
+
+<script>
+$(function() {
+
+    $( "#directory" ).autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+                url: "index.php",
+                dataType: "json",
+                data: {
+                    "id" : pageId,
+                    "tx_yag_pi1[controller]": "Ajax",
+                    "tx_yag_pi1[action]": "directoryAutoComplete",
+                    "tx_yag_pi1[directoryStartsWith]": request.term
+                },
+                success: function( data ) {
+                    response( $.map( data, function( item ) {
+                        return {
+                            label: item.value,
+                            value: item.value,
+                            result: item.value
+                        }
+                    }));
+                }
+            });
+        },
+        minLength: 0,
+        select: function( event, ui ) {
+           $("#directory").val(ui.item.value);
+        }
+    });
+});
+</script>
+
+
+
+<f:form method="post" controller="DirectoryImport" action="importFromDirectory" name="importFromDirectory">
+    <script>var pageId = {pageId};</script>
+    <f:if condition="{albums}">
+        <f:then>
+		    <label for="album">Album</label>
+		    <f:form.select name="albumUid" options="{albums}" optionValueField="uid" optionLabelField="name" />
+	    </f:then>
+	    <f:else>
+	        <f:form.hidden name="albumUid" value="{album.uid}" />
+	    </f:else>
+    </f:if>
+    <div class="ui-widget">
+        <label for="directory">Directory</label>
+        <f:form.textbox name="directory" value="{directory}" id="directory" />
+    </div>
+    <f:form.submit value="submit" />
+</f:form>
