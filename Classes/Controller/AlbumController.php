@@ -64,6 +64,7 @@ class Tx_Yag_Controller_AlbumController extends Tx_Yag_Controller_AbstractContro
 			$albumUid = $this->settings['album']['selectedAlbumUid'];
 			$album = $this->albumRepository->findByUid($albumUid);
 		}
+		
 		$extListDataBackend = $this->yagContext->getItemlistContext()->getDataBackend(); 
 		$extListDataBackend->getFilterboxCollection()->getFilterboxByFilterboxIdentifier('internalFilters')->getFilterByFilterIdentifier('albumFilter')->setAlbumUid($album->getUid());
     	$extListDataBackend->getPagerCollection()->reset();
@@ -116,23 +117,28 @@ class Tx_Yag_Controller_AlbumController extends Tx_Yag_Controller_AbstractContro
     /**
      * Delete action for deleting an album
      *
-     * @param int $albumUid UID of album that should be deleted
+     * @param Tx_Yag_Domain_Model_Album $album album that should be deleted
      * @param bool $reallyDelete True, if album should be deleted
      * @return string   The rendered delete action
      * @rbacNeedsAccess
      * @rbacObject Album
      * @rbacAction delete
      */
-    public function deleteAction($albumUid = null, $reallyDelete = false) {
-        $album = $this->albumRepository->findByUid($albumUid);
-        if ($albumUid != null || $album->getUid == $albumUid) {
+    public function deleteAction(Tx_Yag_Domain_Model_Album $album, $reallyDelete = false) {
+     
+        if ($album != null) {
         	$this->view->assign('album', $album);
+        	
         	if ($reallyDelete) {
+        		$this->flashMessageContainer->add(Tx_Extbase_Utility_Localization::translate('tx_yag_controller_album.albumSuccessfullyDeleted', $this->extensionName, array($album->getName())));
         		$album->delete();
-        		$this->view->assign('deleted', 1);
+        		$this->redirect('index', 'Gallery');
         	} 
+        	
         } else {
-        	$this->view->assign('noCorrectAlbumUid', 1);
+        	 $this->flashMessageContainer->add(Tx_Extbase_Utility_Localization::translate('tx_yag_controller_album.albumWithUIDNotFound', $this->extensionName, array($album->getUid())),'',
+        										t3lib_FlashMessage::ERROR);
+        	$this->redirect('index', 'Gallery');
         }
     	
     }
@@ -149,6 +155,37 @@ class Tx_Yag_Controller_AlbumController extends Tx_Yag_Controller_AbstractContro
      */
     public function addItemsAction(Tx_Yag_Domain_Model_Album $album) {
     	$this->view->assign('album', $album);
+    }
+    
+    
+    
+    /**
+     * Updates an existing Album and forwards to the index action afterwards.
+     *
+     * @param Tx_Yag_Domain_Model_Album $album the Album to display
+     * @return string A form to edit a Album 
+     * @rbacNeedsAccess
+     * @rbacObject Album
+     * @rbacAction edit
+     */
+    public function editAction(Tx_Yag_Domain_Model_Album $album) {
+        $this->view->assign('album', $album);
+    }
+    
+    
+    
+    /**
+     * Action for updating an album after it has been edited
+     *
+     * @param Tx_Yag_Domain_Model_Album $album
+     * @rbacNeedsAccess
+     * @rbacObject Album
+     * @rbacAction edit
+     */
+    public function updateAction(Tx_Yag_Domain_Model_Album $album) {
+    	$this->albumRepository->update($album);
+    	$this->flashMessages->add('Album has been updated!');
+    	$this->forward('show');
     }
     
 }

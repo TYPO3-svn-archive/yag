@@ -102,6 +102,7 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
      * This action is final, as it should not be overwritten by any extended controllers
      */
     final protected function initializeAction() {   
+    	
     	if(!$this->configurationBuilder) {
     		if($this->request->getControllerActionName() == 'settingsNotAvailable') return;
     		
@@ -111,15 +112,26 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
     		t3lib_FlashMessage::INFO);
     		$this->redirect('settingsNotAvailable', 'Backend');	
     	}
+    	
     	$this->preInitializeAction();
     	$this->initializeFeUser();
         $this->initAccessControllService();     
     	$this->doRbacCheck();
-    	$this->yagContext->injectRequest($this->request);
     	$this->postInitializeAction();
     }
     
     
+    
+	public function processRequest(Tx_Extbase_MVC_RequestInterface $request, Tx_Extbase_MVC_ResponseInterface $response) {
+		parent::processRequest($request, $response);
+		
+		if(TYPO3_MODE === 'BE') {
+			// if we are in BE mode, this ist the last line called
+			Tx_PtExtlist_Domain_Lifecycle_LifecycleManagerFactory::getInstance()->updateState(Tx_PtExtlist_Domain_Lifecycle_LifecycleManager::END);
+		}
+	}
+    
+	
     
     /**
      * Initializes Access Controll Service 
@@ -191,8 +203,24 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
         if($this->settings != NULL) {
 	        $this->emSettings = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['yag']);
 	        $this->configurationBuilder = Tx_Yag_Domain_Configuration_ConfigurationBuilderFactory::getInstance($this->settings);
+
+	        /**
+	         * As we have configuration builder as a singleton, we cannot determine flexform settings
+	         * if there are multiple instances of a plugin on the same page.
+	         * 
+	         * So we have to pass plugin-instance specific settings via direct access to settings
+	         * here
+	         */
+	        $selectedAlbumUid = null;
+	        if (array_key_exists('album', $this->settings) && array_key_exists('selectedAlbumUid', $this->settings['album'])) {
+	            $selectedAlbumUid = $this->settings['album']['selectedAlbumUid']; 
+	        }
+	        $selectedGalleryUid = null;
+	        if (array_key_exists('gallery', $this->settings && array_key_exists('selectedGalleryUid', $this->settings['gallery']))) {
+	        	$selectedGalleryUid = $this->settings['gallery']['selectedGalleryUid'];
+	        }
 	        // TODO we would rather have a factory here!
-	        $this->yagContext = Tx_Yag_Domain_YagContext::getInstance($this->configurationBuilder);
+	        $this->yagContext = Tx_Yag_Domain_YagContext::getInstance($this->configurationBuilder, $selectedAlbumUid, $selectedGalleryUid);
         }
     }
     
@@ -299,6 +327,11 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
   		
         $this->setCustomPathsInView($view);  
         
+        if($this->yagContext != NULL) {
+        	$this->yagContext->injectControllerContext($this->controllerContext);	
+        }
+        
+        
         $this->view->assign('config', $this->configurationBuilder);
     	$this->view->assign('yagContext', $this->yagContext);
 	}
@@ -314,7 +347,9 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
 	protected function setCustomPathsInView(Tx_Extbase_MVC_View_ViewInterface $view) {
 		
 		// We can overwrite a template via TS using plugin.yag.settings.controller.<ControllerName>.<actionName>.template
+		#print_r('Controller: ' . $this->request->getControllerName() . ' action: ' . $this->request->getControllerActionName());
 		$templatePathAndFilename = $this->settings['controller'][$this->request->getControllerName()][$this->request->getControllerActionName()]['template'];
+		#print_r($templatePathAndFilename);
 		if (isset($templatePathAndFilename) && strlen($templatePathAndFilename) > 0) {
 			if (file_exists(t3lib_div::getFileAbsFileName($templatePathAndFilename))) {
                 $view->setTemplatePathAndFilename(t3lib_div::getFileAbsFileName($templatePathAndFilename));

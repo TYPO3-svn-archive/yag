@@ -108,7 +108,7 @@ CREATE TABLE tx_yag_domain_model_resolutionfilecache (
 	uid int(11) NOT NULL auto_increment,
 	pid int(11) DEFAULT '0' NOT NULL,
 	
-	
+	name tinytext,
 	item int(11) DEFAULT '0' NOT NULL,
 	width int(11) DEFAULT '0' NOT NULL,
 	height int(11) DEFAULT '0' NOT NULL,

@@ -1,8 +1,6 @@
 <?php
 if (!defined ('TYPO3_MODE')) die ('Access denied.');
 
-
-
 /**
  * Register Frontend Plugin
  */
@@ -28,21 +26,25 @@ if (TYPO3_MODE === 'BE')	{
 		'tx_yag_m1',			// Submodule key
 		'',						// Position
 		array(																			// An array holding the controller-action-combinations that are accessible
-			'Gallery' => 'list, index, show, new, create, edit, update, delete',
-			'Album' => 'show, new, create, edit, update, delete, addItems',
-			'Item' => 'index, show, new, create, edit, update, delete',
-			'ItemList' => 'list',
-		    'ItemAdminList' => 'list',
-			'ItemFile' => 'index, show, new, create, edit, update, delete',
-			'DirectoryImport' => 'showImportForm, importFromDirectory',
-		    'ZipImport' => 'showImportForm, importFromZip, createNewAlbumAndImportFromZip',
-			'Development' => 'createSampleData, deleteAll,testExif',
-		    'Remote' => 'addItemToAlbum, albumList, galleryList',
-		    'Ajax' => 'directoryAutoComplete,deleteItem,updateItemName,setItemAsAlbumThumb,updateItemDescription,updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty',
-		    'Navigation' => 'show',
-		    'AjaxEditing' => 'index',
-		    'Setup' => 'index, setupRbac,truncateTables',
-			'Backend' => 'settingsNotAvailable',
+	        'Gallery' => 'list, index, show, new, create, edit, update, delete',
+	        'Album' => 'show, new, create, edit, update, delete, addItems',
+	        'MultifileUpload' => 'showUploadForm, upload',
+	        'Item' => 'index, show, new, create, edit, update, delete',
+	        'ItemList' => 'list',
+	        'ItemAdminList' => 'list',
+	        'ItemFile' => 'index, show, new, create, edit, update, delete',
+	        'DirectoryImport' => 'showImportForm, importFromDirectory',
+	        'ZipImport' => 'showImportForm, importFromZip, createNewAlbumAndImportFromZip',
+	        'Development' => 'createSampleData, deleteAll,testExif',
+	        'Remote' => 'addItemToAlbum, albumList, galleryList',
+	        'Ajax' => 'updateGallerySorting,directoryAutoComplete,deleteItem,updateItemTitle,setItemAsAlbumThumb,updateItemDescription,updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty',
+	        'AjaxEditing' => 'index',
+	        'Setup' => 'index, setupRbac,truncateTables',
+	        'AdminMenu' => 'index',
+		
+		    // This is additional for backend! Keep in mind, when copy&pasting from ext_localconf
+			'Backend' => 'settingsNotAvailable,maintenanceOverview',
+			'ResolutionFileCache' => 'clearResolutionFileCache',
 			),
 		array(
 			'access' => 'user,group',
@@ -50,6 +52,7 @@ if (TYPO3_MODE === 'BE')	{
 			'labels' => 'LLL:EXT:' . $_EXTKEY . '/Resources/Private/Language/locallang_mod.xml',
 		)
 	);
+	
 }
 
 
@@ -159,7 +162,7 @@ t3lib_extMgm::allowTableOnStandardPages('tx_yag_domain_model_resolutionfilecache
 $TCA['tx_yag_domain_model_resolutionfilecache'] = array (
 	'ctrl' => array (
 		'title'             => 'LLL:EXT:yag/Resources/Private/Language/locallang_db.xml:tx_yag_domain_model_resolutionfilecache',
-		'label' 			=> 'width',
+		'label' 			=> 'name',
 		'tstamp' 			=> 'tstamp',
 		'crdate' 			=> 'crdate',
 		'versioningWS' 		=> 2,

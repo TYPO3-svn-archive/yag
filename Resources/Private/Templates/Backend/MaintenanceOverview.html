@@ -1,0 +1,28 @@
+{namespace yag=Tx_Yag_ViewHelpers}
+
+<extlist:comment>
+<!--  
+Template for rendering an admin menu
+
+Here is a list of objects / variables that can be accessed in this template:
+
+
+@package YAG
+@author Michael Knoll <mimi@kaktusteam.de>
+@author Daniel Lienert <daniel@lienert.cc>
+-->
+</extlist:comment>
+
+<yag:Backend.configuration />
+
+<f:layout name="Default" />
+<f:section name="main">
+	<f:renderFlashMessages class="tx-extbase-flash-message" renderMode='div'/>
+	
+	<ul>
+		<li><f:link.action controller="ResolutionFileCache" action="clearResolutionFileCache">Clear resolution file cache</f:link.action></li>
+	</ul>
+</f:section>
+
+<f:section name="beButtonsLeft">
+</f:section>

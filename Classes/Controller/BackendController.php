@@ -39,6 +39,14 @@ class Tx_Yag_Controller_BackendController extends Tx_Yag_Controller_AbstractCont
 		// Nothing to do here but showing the template
 	}
 	
+	
+	/**
+	 * Show the maintenance overview
+	 */
+	public function maintenanceOverviewAction() {
+		
+	}
+	
 }
  
 ?>

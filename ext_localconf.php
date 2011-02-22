@@ -48,8 +48,7 @@ Tx_Extbase_Utility_Extension::configurePlugin(
 	    'ZipImport' => 'showImportForm, importFromZip, createNewAlbumAndImportFromZip',
 		'Development' => 'createSampleData, deleteAll,testExif',
 	    'Remote' => 'addItemToAlbum, albumList, galleryList',
-	    'Ajax' => 'directoryAutoComplete,deleteItem,updateItemName,setItemAsAlbumThumb,updateItemDescription,updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty',
-		'Backend' => 'settingsNotAvailable',
+	    'Ajax' => 'updateGallerySorting,directoryAutoComplete,deleteItem,updateItemTitle,setItemAsAlbumThumb,updateItemDescription,updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty',
 	    'AjaxEditing' => 'index',
 	    'Setup' => 'index, setupRbac,truncateTables',
 	    'AdminMenu' => 'index'
@@ -64,7 +63,7 @@ Tx_Extbase_Utility_Extension::configurePlugin(
         'ZipImport' => 'showImportForm, importFromZip, createNewAlbumAndImportFromZip',
 		'Remote' => 'addItemToAlbum, albumList, galleryList',
         'Development' => 'createSampleData, deleteAll, testExif',
-        'Ajax' => 'directoryAutoComplete,deleteItem,updateItemName,setItemAsAlbumThumb,updateItemDescription,updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty',
+        'Ajax' => 'updateGallerySorting,directoryAutoComplete,deleteItem,updateItemTitle,setItemAsAlbumThumb,updateItemDescription,updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty',
 		'ItemList' => 'list',
         'ItemAdminList' => 'list',
         'AjaxEditing' => 'index',
@@ -73,6 +72,12 @@ Tx_Extbase_Utility_Extension::configurePlugin(
 	)
 );
 
-require_once t3lib_extMgm::extPath('yag').'Classes/Utility/Flexform/FlexformRenderFunctions.php';
+if(TYPO3_MODE == 'BE') {
+	// Flexform record selctor
+	require_once t3lib_extMgm::extPath('yag').'Classes/Utility/Flexform/RecordSelector.php';
+	$TYPO3_CONF_VARS['BE']['AJAX']['txyagM1::getAlbumList'] = t3lib_extMgm::extPath('yag').'Classes/Utility/Flexform/RecordSelector.php:user_Tx_Yag_Utility_Flexform_RecordSelector->getAlbumListAsJSON';
+}
+
+
 
 ?>

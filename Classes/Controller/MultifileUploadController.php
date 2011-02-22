@@ -51,22 +51,19 @@ class Tx_Yag_Controller_MultifileUploadController extends Tx_Yag_Controller_Abst
 	 * @return void Nothing, as we are called in AJAX mode from flash uploader
 	 */
 	public function uploadAction(Tx_Yag_Domain_Model_Album $album = null) {
-		error_log(print_r($_FILES, true));
+
 		if (!file_exists($_FILES['Filedata']['tmp_name'])) {
 			$this->handleError('No file found in upload data!');
 			exit(0);
 		} 
 		try {
-			// TODO Respect selected album / parameter
-			$albumRepository = t3lib_div::makeInstance('Tx_Yag_Domain_Repository_AlbumRepository');
-			$query = $albumRepository->createQuery();
-			$query->getQuerySettings()->setRespectStoragePage(FALSE);
-			$albums = $query->execute();
-			$album = $albums[0];
-			$fileToImport = $_FILES['Filedata']['tmp_name'];
-			$fileImporter = Tx_Yag_Domain_Import_FileImporter_ImporterBuilder::getInstance()->getImporterInstanceByFilePathAndAlbum($fileToImport, $album);
+			$fileImporter = Tx_Yag_Domain_Import_FileImporter_ImporterBuilder::getInstance()->getImporterInstanceByAlbum($album);
+			
+			$fileImporter->setFilePath($_FILES['Filedata']['tmp_name']);
+			$fileImporter->setOriginalFileName($_FILES['Filedata']['name']);
+			$fileImporter->setItemType($_FILES['Filedata']['type']);
+			
 			$fileImporter->runImport();
-			exit(0);
 		} catch (Exception $e) {
 			// We are in ajax mode, no error goes to browser --> write to error log
 			error_log($e->getMessage());
