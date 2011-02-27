@@ -71,8 +71,9 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 		
 		$this->objectManager = t3lib_div::makeInstance('Tx_Extbase_Object_ObjectManager'); 
 		
-		// Fake an empty configurationBuilder for imageViewHelper
-		Tx_Yag_Domain_Configuration_ConfigurationBuilderFactory::getInstance(array());
+		// Fake an empty configurationBuilder for imageViewHelper // use real settings here!
+		$settings = array('sysImages' => array('imageNotFound' => array('sourceUri' => 'typo3conf/ext/yag/Resources/Public/Icons/imageNotFound.jpg')));
+		Tx_Yag_Domain_Configuration_ConfigurationBuilderFactory::getInstance($settings);
 		
 		$this->initBackendRequirements();
 	}
@@ -113,23 +114,30 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 	}
 	
 	
-	public function getAlbumListAsJSON() {
+	
+	/**
+	 * 
+	 * Get Album List as JSON 
+	 */
+	public function getAlbumSelectList() {
+		
 		$galleryRepository = $this->objectManager->get('Tx_Yag_Domain_Repository_GalleryRepository');
-		$gallery = $galleryRepository->findByUid(1);
 		
-		$albumData = array();
+		$galleryID = (int) t3lib_div::_GP('galleryUid');
+		$albums = $galleryRepository->findByUid($galleryID)->getAlbums();
 		
-		/* @var $album Tx_Yag_Domain_Model_Album */
-		foreach($gallery->getAlbums() as $album) {
-			$albumData[$album->getUid()] = array(
-				'name' => $album->getName(),
-				'itemCount' => $album->getItemCount(),
-			);
-		}
+		$template = t3lib_div::getFileAbsFileName('EXT:yag/Resources/Private/Templates/Backend/FlexForm/FlexFormAlbumList.html');
+		$renderer = $this->getFluidRenderer();
 		
-		echo json_encode($albumData);
+		$renderer->setTemplatePathAndFilename($template);
 		
+		$renderer->assign('albums', $albums);		
+		
+		$content = $renderer->render();
+		
+		echo $content;
 	}
+	
 	
 	
 	/**
@@ -144,10 +152,9 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 		
 		/* @var $galleryRepository Tx_Yag_Domain_Repository_GalleryRepository */
 		$galleryRepository = $this->objectManager->get('Tx_Yag_Domain_Repository_GalleryRepository');
-		
 		$galleries = $galleryRepository->findAll();
-	
-		$template = t3lib_div::getFileAbsFileName('EXT:yag/Resources/Private/Templates/Backend/FlexForm/FlexFormSelectListAlbum.html');
+		
+		$template = t3lib_div::getFileAbsFileName('EXT:yag/Resources/Private/Templates/Backend/FlexForm/FlexFormAlbum.html');
 		$renderer = $this->getFluidRenderer();
 		
 		$renderer->setTemplatePathAndFilename($template);
@@ -178,7 +185,7 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 		
 		$galleries = $galleryRepository->findAll();
 	
-		$template = t3lib_div::getFileAbsFileName('EXT:yag/Resources/Private/Templates/Backend/FlexForm/FlexFormSelectListGallery.html');
+		$template = t3lib_div::getFileAbsFileName('EXT:yag/Resources/Private/Templates/Backend/FlexForm/FlexFormGallery.html');
 		$renderer = $this->getFluidRenderer();
 		
 		$renderer->setTemplatePathAndFilename($template);
@@ -190,6 +197,37 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 		
 		return $content;
 	}
+	
+	
+	
+	/**
+	 * Render the image Selector
+	 * 
+	 * @param unknown_type $PA
+	 * @param unknown_type $fobj
+	 */
+	public function renderImageSelector(&$PA, &$fobj) {
+		
+		$PA['elementID'] = 'field_' . md5($PA['itemFormElID']);
+		
+		/* @var $galleryRepository Tx_Yag_Domain_Repository_GalleryRepository */
+		$galleryRepository = $this->objectManager->get('Tx_Yag_Domain_Repository_GalleryRepository');
+		
+		$galleries = $galleryRepository->findAll();
+	
+		$template = t3lib_div::getFileAbsFileName('EXT:yag/Resources/Private/Templates/Backend/FlexForm/FlexFormImage.html');
+		$renderer = $this->getFluidRenderer();
+		
+		$renderer->setTemplatePathAndFilename($template);
+		
+		$renderer->assign('galleries', $galleries);
+		$renderer->assign('PA', $PA);		
+		
+		$content = $renderer->render();
+		
+		return $content;
+	}
+	
 	
 	
 	/**
