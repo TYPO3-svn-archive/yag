@@ -15,9 +15,13 @@ Here is a list of objects / variables that can be accessed in this template:
 
 <div class="tx-yag-pi1">
 	
-	<yag:breadcrumbs />
+	<f:if condition="{config.themeConfiguration.showBreadcrumbs}">
+		<yag:breadcrumbs />
+	</f:if>
 	
 	<f:render section="main" />
 	
 	<f:render section="feAdminLinks" />
 </div>
+
+<div style="clear:both;">&nbsp;</div>

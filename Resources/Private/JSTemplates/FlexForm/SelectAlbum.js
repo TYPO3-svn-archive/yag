@@ -10,13 +10,23 @@ jQuery(function() {
 			} 
 		}
 	});
+	
+	jQuery( "#albumAlbumSelector" ).selectable({
+		   selected: function(event, ui) {
+				var albumUid = jQuery(ui.selected).attr('albumUid');
+				if(albumUid > 0) {
+					jQuery("####elementId###").val(albumUid);
+				} 
+			}
+		});
+	
 });
 
 
 
 function loadAlbumList(galleryUid) {
 	
-	var	ajaxRequestAlbumID = 'ajaxID=txyagM1::getAlbumList&galleryUid=' + galleryUid;
+	var	ajaxRequestAlbumID = 'ajaxID=txyagM1::getAlbumList&galleryUid=' + galleryUid + '&PID=###PID###';
 	jQuery.ajax({
         url: 'ajax.php',
         data: ajaxRequestAlbumID, 
@@ -29,7 +39,7 @@ function loadAlbumList(galleryUid) {
 
 
 function setAlbumList(data) {
-	jQuery('#albumAlbumSelectorBox').removeClass('inactiveSelectorBox').addClass("albumAlbumSelectorBox");
+	jQuery('#albumAlbumSelectorBox').removeClass('inactiveSelectorBox').addClass("itemSelectorBox");
 	jQuery('#albumAlbumSelectorBox .inactiveInfo').remove();
 	
 	jQuery('#albumAlbumSelectorBox').html(data);

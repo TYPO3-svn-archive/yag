@@ -42,20 +42,48 @@ class Tx_Yag_Domain_Configuration_Album_AlbumConfiguration extends Tx_PtExtlist_
 	protected $selectedAlbumUid;
 	
 	
+	/**
+	 * Items to show per page
+	 * 
+	 * @var integer
+	 */
+	protected $itemsPerPage;
+	
+	
 	
 	/**
 	 * Initializes configuration object (Template method)
 	 */
 	protected function init() {
 		$this->setValueIfExists('selectedAlbumUid');
+		$this->setValueIfExists('itemsPerPage');
 	}
 
+	
 	
 	/**
 	 * @return int 
 	 */
 	public function getSelectedAlbumUid() {
 		return $this->selectedAlbumUid;
+	}
+	
+
+	
+	/**
+	 * @var int $albumUid  
+	 */
+	public function setSelectedAlbumUid($albumUid) {
+		$this->selectedAlbumUid = $albumUid;
+	}
+	
+	
+	
+	/**
+	 * @return int 
+	 */
+	public function getItemsPerPage() {
+		return $this->getItemsPerPage();
 	}
 }
 ?>

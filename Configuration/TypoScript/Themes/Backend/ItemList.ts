@@ -1,0 +1,19 @@
+####################################################
+# Extlist configuration of the album 
+#
+# @author Daniel Lienert <daniel@lienert.cc> Michael Knoll <knoll@punkt.de>
+# @package YAG
+# @subpackage Typoscript
+####################################################
+
+plugin.tx_yag.settings.themes.backend.itemList {
+	
+	itemsPerPage = 15
+	columnCount = 5
+	showTitle = 1
+	
+    ## Set partial used for rendering an image thumbnail
+    imageThumbPartial = ImageThumb
+    
+    imageAdminThumbPartial = ImageAdminThumb
+}

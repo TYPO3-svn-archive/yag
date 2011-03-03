@@ -26,7 +26,6 @@ Tx_PtExtlist_Domain_Model_Pager_PagerCollection pagerCollection Collection of pa
     
 <h2>Gallery: {gallery.name}</h2>
 <div>Drag and drop albums to change sorting!</div>
-<div id="messages"></div>
     
 <table id="sortable" class="grid typo3-dblist" cellspacing="0" cellpadding="0" border="0">
 	<thead>
@@ -57,7 +56,7 @@ Tx_PtExtlist_Domain_Model_Pager_PagerCollection pagerCollection Collection of pa
             
             </td>
             <td>
-			    <f:link.action action="submitFilter" controller="ItemAdminList" arguments="{extlist:namespace.GPArray(nameSpace:'itemList.filters.internalFilters.albumFilter' arguments:'albumUid:{listRow.album.value.uid}')}">
+			    <f:link.action action="submitFilter" controller="ItemAdminList" arguments="{extlist:namespace.GPArray(object: yagContext arguments:'albumUid:{listRow.album.value.uid}')}">
 			        <f:if condition="{listRow.album.value.itemCount} > 0">
 			            <f:then>
 			                <yag:image item="{listRow.album.value.thumb}" resolutionName="thumb" />

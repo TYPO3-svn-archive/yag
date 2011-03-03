@@ -11,7 +11,7 @@
         </TCEforms>
         <type>array</type>
         <el>  
-          
+                    
           <switchableControllerActions>
             <TCEforms>
               <label>Plugin type</label>
@@ -20,11 +20,11 @@
                 <items type="array">
                   <numIndex index="1" type="array">
                     <numIndex index="0">Gallery List</numIndex>
-                    <numIndex index="1">Gallery->list;ItemList->list;ItemList->submitFilter;ItemList->resetFilter;Item->show</numIndex>
+                    <numIndex index="1">Gallery->list;Gallery->index;ItemList->list;ItemList->submitFilter;ItemList->resetFilter;Item->show</numIndex>
                   </numIndex>
                   <numIndex index="2" type="array">
                     <numIndex index="0">Specific Gallery</numIndex>
-                    <numIndex index="1">Gallery->list;Gallery->index;ItemList->list;ItemList->submitFilter;ItemList->resetFilter;Item->show</numIndex>
+                    <numIndex index="1">Gallery->index;ItemList->list;ItemList->submitFilter;ItemList->resetFilter;Item->show</numIndex>
                   </numIndex>
                   <numIndex index="3" type="array">
                     <numIndex index="0">Specific Album</numIndex>
@@ -43,6 +43,30 @@
             </TCEforms>
           </switchableControllerActions>
 
+		
+		  <settings.theme>
+            <TCEforms>
+              <label>Theme</label>
+              <config>
+                <type>select</type>
+				<default>default</default>
+				<itemsProcFunc>user_Tx_Yag_Utility_Flexform_TyposcriptDataProvider->getDefinedThemes</itemsProcFunc>
+              </config>
+            </TCEforms>
+          </settings.theme>
+	
+			
+          <settings.contextIdentifier>
+            <TCEforms>
+              <label>Context Identifier</label>
+              <config>
+                <type>input</type>
+                <size>30</size>
+                <eval>string</eval>
+                <default></default>
+              </config>
+            </TCEforms>
+          </settings.contextIdentifier>
 
         </el>
       </ROOT>

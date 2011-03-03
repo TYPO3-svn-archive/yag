@@ -36,7 +36,7 @@ class Tx_Yag_ViewHelpers_Widget_Controller_BreadcrumbsController extends Tx_Flui
 	/**
 	 * Holds an instance of gallery context
 	 *
-	 * @var Tx_Yag_Domain_YagContext
+	 * @var Tx_Yag_Domain_Context_YagContext
 	 */
 	protected $yagContext;
 	
@@ -45,28 +45,7 @@ class Tx_Yag_ViewHelpers_Widget_Controller_BreadcrumbsController extends Tx_Flui
 	 * @return void
 	 */
 	public function initializeAction() {
-		/**
-		 * We have to get some settings
-		 */
-	     
-        /**
-         * As we have configuration builder as a singleton, we cannot determine flexform settings
-         * if there are multiple instances of a plugin on the same page.
-         * 
-         * So we have to pass plugin-instance specific settings via direct access to settings
-         * here
-         * 
-         * TODO this is duplicated code here!
-         */
-        $selectedAlbumUid = null;
-        if (array_key_exists('album', $this->settings) && array_key_exists('selectedAlbumUid', $this->settings['album'])) {
-            $selectedAlbumUid = $this->settings['album']['selectedAlbumUid']; 
-        }
-        $selectedGalleryUid = null;
-        if (array_key_exists('gallery', $this->settings && array_key_exists('selectedGalleryUid', $this->settings['gallery']))) {
-            $selectedGalleryUid = $this->settings['gallery']['selectedGalleryUid'];
-        }		
-		$this->yagContext = Tx_Yag_Domain_YagContext::getInstance(Tx_Yag_Domain_Configuration_ConfigurationBuilderFactory::getInstance(), $selectedAlbumUid, $selectedGalleryUid);
+		$this->yagContext = Tx_Yag_Domain_Context_YagContextFactory::getInstance();
 	}
 	
 	
@@ -74,9 +53,11 @@ class Tx_Yag_ViewHelpers_Widget_Controller_BreadcrumbsController extends Tx_Flui
 	 * @return void
 	 */
 	public function indexAction() {
-        // TODO this is dangerous, as request is injected into yag context in abstract controller
+        
+		// TODO this is dangerous, as request is injected into yag context in abstract controller
     	// TODO use cobj functionality to render breadcrumbs here!
-    	switch ($this->yagContext->getRequest()->getControllerName()) {
+		
+    	switch ($this->yagContext->getControllerContext()->getRequest()->getControllerName()) {
     		
     		case 'Item' :
                 $this->assignCurrentAlbumToView();
@@ -90,7 +71,7 @@ class Tx_Yag_ViewHelpers_Widget_Controller_BreadcrumbsController extends Tx_Flui
     	        break;     
     		
     		case 'Gallery' :
-    			if ($this->yagContext->getGpVarActionName() == 'index') {
+    			if ($this->yagContext->getControllerContext()->getRequest()->getControllerActionName() == 'index') {
     		        $this->assignCurrentGalleryToView();
     			}
         		break;

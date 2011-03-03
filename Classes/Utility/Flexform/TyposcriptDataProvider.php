@@ -30,6 +30,7 @@
 require_once t3lib_extMgm::extPath('pt_tools').'res/staticlib/class.tx_pttools_div.php';
 
 
+
 /**
  * Utilitty to get selectable options from typoscript
  *
@@ -64,7 +65,6 @@ class user_Tx_Yag_Utility_Flexform_TyposcriptDataProvider {
 	public function getDefinedThemes(array $config) {
 		$this->initTsDataProvider($config);
 		$config['items'] = array_merge($config['items'],$this->getTypoScriptKeyList('settings.themes'));
-		
 		return $config;
 	}
 
@@ -77,7 +77,7 @@ class user_Tx_Yag_Utility_Flexform_TyposcriptDataProvider {
 	 */
 	protected function initTsDataProvider($config) {
 		$this->currentPid =  $this->getCurrentPID($config);
-		$this->loadExtListTyposcriptArray();
+		$this->loadYagTyposcriptArray();
 	}
 	
 	
@@ -88,15 +88,20 @@ class user_Tx_Yag_Utility_Flexform_TyposcriptDataProvider {
 	 * @param array $config
 	 */
 	protected function getCurrentPID($config) {
-		return (int) $config['row']['pid'];
+		$pid = (int) $config['row']['pid'];
+		if(!$pid) {
+			$pid = t3lib_div::_GP('id');
+		}
+		
+		return $pid;
 	}
 	
 	
 	/**
 	 * Load the complete extlist part from typoscript
 	 */
-	protected function loadExtListTyposcriptArray() {
-		if(is_null($this->extListTypoScript)) {
+	protected function loadYagTyposcriptArray() {
+		if(is_null($this->yagTypoScript)) {
 			$extListTS = tx_pttools_div::typoscriptRegistry('plugin.tx_yag.', $this->currentPid);
 			$this->yagTypoScript =  Tx_Extbase_Utility_TypoScript::convertTypoScriptArrayToPlainArray($extListTS);
 		}

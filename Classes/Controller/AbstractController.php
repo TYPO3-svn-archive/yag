@@ -67,7 +67,7 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
 	/**
 	 * Holds an instance of gallery context
 	 *
-	 * @var Tx_Yag_Domain_YagContext
+	 * @var Tx_Yag_Domain_Context_YagContext
 	 */
 	protected $yagContext;
 	
@@ -96,6 +96,14 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
      */
     protected $rbacAccessControllService;
 	 
+    
+
+    public function __construct() {
+    	$this->lifecycleManager = Tx_PtExtlist_Domain_Lifecycle_LifecycleManagerFactory::getInstance();
+		$this->lifecycleManager->registerAndUpdateStateOnRegisteredObject(Tx_PtExtlist_Domain_StateAdapter_SessionPersistenceManagerFactory::getInstance());
+		
+		parent::__construct();
+    }
     
     
     /**
@@ -202,28 +210,48 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
 		
         if($this->settings != NULL) {
 	        $this->emSettings = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['yag']);
-	        $this->configurationBuilder = Tx_Yag_Domain_Configuration_ConfigurationBuilderFactory::getInstance($this->settings);
+	        
+	        Tx_Yag_Domain_Configuration_ConfigurationBuilderFactory::injectSettings($this->settings);
+	        $this->configurationBuilder = Tx_Yag_Domain_Configuration_ConfigurationBuilderFactory::getInstance($this->settings['theme']);
 
-	        /**
-	         * As we have configuration builder as a singleton, we cannot determine flexform settings
-	         * if there are multiple instances of a plugin on the same page.
-	         * 
-	         * So we have to pass plugin-instance specific settings via direct access to settings
-	         * here
-	         */
-	        $selectedAlbumUid = null;
-	        if (array_key_exists('album', $this->settings) && array_key_exists('selectedAlbumUid', $this->settings['album'])) {
-	            $selectedAlbumUid = $this->settings['album']['selectedAlbumUid']; 
+          /**
+           * As we have configuration builder as a singleton, we cannot determine flexform settings
+           * if there are multiple instances of a plugin on the same page.
+           * 
+           * So we have to pass plugin-instance specific settings via direct access to settings
+           * here
+           * 
+           * YOU SHOULD TAKE THIS SERIOUSLY!
+           */
+          	if (array_key_exists('album', $this->settings) && array_key_exists('selectedAlbumUid', $this->settings['album'])) {
+	        	$this->configurationBuilder->buildAlbumConfiguration()->setSelectedAlbumUid($this->settings['album']['selectedAlbumUid']); 
 	        }
-	        $selectedGalleryUid = null;
-	        if (array_key_exists('gallery', $this->settings && array_key_exists('selectedGalleryUid', $this->settings['gallery']))) {
-	        	$selectedGalleryUid = $this->settings['gallery']['selectedGalleryUid'];
-	        }
-	        // TODO we would rather have a factory here!
-	        $this->yagContext = Tx_Yag_Domain_YagContext::getInstance($this->configurationBuilder, $selectedAlbumUid, $selectedGalleryUid);
+
+	        if (array_key_exists('gallery', $this->settings) && array_key_exists('selectedGalleryUid', $this->settings['gallery'])) {
+	        	$this->configurationBuilder->buildGalleryConfiguration()->setSelectedGalleryUid($this->settings['gallery']['selectedGalleryUid']);
+	        }    
+	        
+	        $this->yagContext = Tx_Yag_Domain_Context_YagContextFactory::createInstance($this->getContextIdentifier()); // TODO: instead of time : contentelement uid or defined identifier
         }
     }
     
+    
+    protected function getContextIdentifier() {
+    	// Stage 1: get a defined identifier
+    	$identifier  = trim($this->settings['contextIdentifier']);
+    	
+    	// Stage 2: get identifier from content element uid (Frontend only)
+    	if(!$identifier) {
+    		$identifier =  $this->configurationManager->getContentObject()->data['uid'];
+    	}
+    	
+    	// Stage 3: (in backend) generate a default identifier, with this identifier, it is not posible to display two elements on one page (which is not posible in backend)
+    	if(!$identifier) {
+    		$identifier = 'backend';
+    	}
+    	
+    	return $identifier;
+    }
     
     
     /**
@@ -327,11 +355,11 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
   		
         $this->setCustomPathsInView($view);  
         
-        if($this->yagContext != NULL) {
-        	$this->yagContext->injectControllerContext($this->controllerContext);	
+        if($this->yagContext !== NULL) {
+        	$this->yagContext->injectControllerContext($this->controllerContext);        	
         }
-        
-        
+	
+                
         $this->view->assign('config', $this->configurationBuilder);
     	$this->view->assign('yagContext', $this->yagContext);
 	}
@@ -347,9 +375,8 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
 	protected function setCustomPathsInView(Tx_Extbase_MVC_View_ViewInterface $view) {
 		
 		// We can overwrite a template via TS using plugin.yag.settings.controller.<ControllerName>.<actionName>.template
-		#print_r('Controller: ' . $this->request->getControllerName() . ' action: ' . $this->request->getControllerActionName());
 		$templatePathAndFilename = $this->settings['controller'][$this->request->getControllerName()][$this->request->getControllerActionName()]['template'];
-		#print_r($templatePathAndFilename);
+	
 		if (isset($templatePathAndFilename) && strlen($templatePathAndFilename) > 0) {
 			if (file_exists(t3lib_div::getFileAbsFileName($templatePathAndFilename))) {
                 $view->setTemplatePathAndFilename(t3lib_div::getFileAbsFileName($templatePathAndFilename));

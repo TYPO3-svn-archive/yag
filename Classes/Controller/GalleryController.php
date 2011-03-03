@@ -47,15 +47,6 @@ class Tx_Yag_Controller_GalleryController extends Tx_Yag_Controller_AbstractCont
 	 * @var Tx_Yag_Domain_Repository_AlbumRepository
 	 */
 	protected $albumRepository;
-	
-	
-	
-	/**
-	 * Holds an instance of yag context
-	 *
-	 * @var Tx_Yag_Domain_YagContext
-	 */
-	protected $yagContext;
     
     
 
@@ -103,23 +94,17 @@ class Tx_Yag_Controller_GalleryController extends Tx_Yag_Controller_AbstractCont
         
 		$pagerIdentifier = (empty($this->settings['pagerIdentifier']) ? 'default' : $this->settings['pagerIdentifier']);
 
-		if ($gallery === null) {
-			// If we do not get a gallery from Request, we try to get it from filter
+		if ($gallery === NULL) {
+			// If we do not get a gallery from Request, we get it from context
 		    $gallery = $this->yagContext->getSelectedGallery();
 		} else {
-			// If we got a gallery from request, we set it to filter
-			$filter = $extlistContext->getDataBackend()->getFilterboxCollection()->getFilterboxByFilterboxIdentifier('internalFilters')->getFilterByFilterIdentifier('galleryFilter');
-            /* @var $filter Tx_Yag_Extlist_Filter_GalleryFilter */
-			$filter->setGalleryUid($gallery->getUid());
+			$this->yagContext->setGallery($gallery);
 		}
 		
-		// Set context
-		if ($gallery !== null) {
-		    $this->view->assign('gallery', $gallery);
-		}
+		// TODO GalleryNotFoundMessage
 		
-		$this->view->assign('gallery', $gallery);
-		$this->view->assign('pageIdVar', 'var pageId = ' . $_GET['id'] . ';');
+	    $this->view->assign('gallery', $gallery);		
+		$this->view->assign('pageIdVar', 'var pageId = ' . $_GET['id'] . ';'); // TODO Make it pretty!
 		$this->view->assign('listData', $extlistContext->getRenderedListData());
         $this->view->assign('pagerCollection', $extlistContext->getPagerCollection());
         $this->view->assign('pager', $extlistContext->getPagerCollection()->getPagerByIdentifier($pagerIdentifier));

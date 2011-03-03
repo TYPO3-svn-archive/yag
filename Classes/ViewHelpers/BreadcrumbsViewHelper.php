@@ -46,6 +46,7 @@ class Tx_Yag_ViewHelpers_BreadcrumbsViewHelper extends Tx_Fluid_Core_Widget_Abst
 		$this->controller = $controller;
 	}
 	
+	
 
 	/**
 	 * Render the navigation path
