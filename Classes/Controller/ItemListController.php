@@ -92,6 +92,21 @@ class Tx_Yag_Controller_ItemListController extends Tx_Yag_Controller_AbstractCon
 	}
     
     
+	
+	/**
+	 * Action to render a separate pure XML List 
+	 * 
+	 */
+	public function xmllistAction() {
+		$this->extListContext->getPagerCollection()->setItemsPerPage($this->configurationBuilder->buildItemListConfiguration()->getItemsPerPage());
+		
+		$selectedAlbum = $this->yagContext->getSelectedAlbum();
+        
+        $this->view->assign('album', $selectedAlbum);
+		$this->view->assign('listData', $this->extListContext->getRenderedListData());
+	}
+	
+	
     
     /**
      * Generate and add RSS header for Cooliris

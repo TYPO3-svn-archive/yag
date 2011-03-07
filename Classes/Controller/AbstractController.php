@@ -106,6 +106,7 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
     }
     
     
+    
     /**
      * This action is final, as it should not be overwritten by any extended controllers
      */
@@ -178,14 +179,12 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
      *
      * Feel free to override this method in your respective controller
      * 
-     * @param Tx_Yag_Domain_Model_Album $album      
-     * @param Tx_Yag_Domain_Model_Gallery $gallery
      */
     protected function accessDeniedAction() {
-    	// TODO set defaults in TS prototype not here!
-    	$accessDeniedController = $this->settings['accessDenied']['controller'] != '' ? $this->settings['accessDenied']['controller'] : 'Gallery';
-    	$accessDeniedAction = $this->settings['accessDenied']['action'] != '' ? $this->settings['accessDenied']['action'] : 'list';
-        $this->redirect($accessDeniedAction, $accessDeniedController);
+    	$action = $this->controllerContext->getRequest()->getControllerName() . '->' . $this->controllerContext->getRequest()->getControllerActionName();
+    	
+    	$this->flashMessageContainer->add(Tx_Extbase_Utility_Localization::translate('tx_yag_general.accessDenied', $this->extensionName, array($action)),'',t3lib_FlashMessage::ERROR);
+		$this->forward('index', 'Error');
     }
     
     
@@ -206,7 +205,8 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
 	 * @param Tx_Extbase_Configuration_ConfigurationManager $configurationManager
 	 */
     public function injectConfigurationManager(Tx_Extbase_Configuration_ConfigurationManager $configurationManager) {
-        parent::injectConfigurationManager($configurationManager);
+
+    	parent::injectConfigurationManager($configurationManager);
 		
         if($this->settings != NULL) {
 	        $this->emSettings = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['yag']);
@@ -230,28 +230,35 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
 	        if (array_key_exists('gallery', $this->settings) && array_key_exists('selectedGalleryUid', $this->settings['gallery'])) {
 	        	$this->configurationBuilder->buildGalleryConfiguration()->setSelectedGalleryUid($this->settings['gallery']['selectedGalleryUid']);
 	        }    
-	        
+
 	        $this->yagContext = Tx_Yag_Domain_Context_YagContextFactory::createInstance($this->getContextIdentifier()); // TODO: instead of time : contentelement uid or defined identifier
         }
     }
     
     
+    
     protected function getContextIdentifier() {
-    	// Stage 1: get a defined identifier
-    	$identifier  = trim($this->settings['contextIdentifier']);
+    	// Stage 2: get the identifier from GET / POST
+    	$identifier  = Tx_PtExtlist_Domain_StateAdapter_GetPostVarAdapterFactory::getInstance()->extractGpVarsByNamespace('contextIdentifier');
     	
-    	// Stage 2: get identifier from content element uid (Frontend only)
+    	// Stage 2: get a defined identifier
+    	if(!$identifier) {
+    		$identifier  = trim($this->settings['contextIdentifier']);	
+    	}    
+    	
+    	// Stage 3: get identifier from content element uid (Frontend only)
     	if(!$identifier) {
     		$identifier =  $this->configurationManager->getContentObject()->data['uid'];
     	}
     	
-    	// Stage 3: (in backend) generate a default identifier, with this identifier, it is not posible to display two elements on one page (which is not posible in backend)
+    	// Stage 4: (in backend) generate a default identifier, with this identifier, it is not posible to display two elements on one page (which is not posible in backend)
     	if(!$identifier) {
     		$identifier = 'backend';
     	}
     	
     	return $identifier;
     }
+    
     
     
     /**
@@ -359,7 +366,6 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
         	$this->yagContext->injectControllerContext($this->controllerContext);        	
         }
 	
-                
         $this->view->assign('config', $this->configurationBuilder);
     	$this->view->assign('yagContext', $this->yagContext);
 	}
@@ -375,7 +381,11 @@ abstract class Tx_Yag_Controller_AbstractController extends Tx_Extbase_MVC_Contr
 	protected function setCustomPathsInView(Tx_Extbase_MVC_View_ViewInterface $view) {
 		
 		// We can overwrite a template via TS using plugin.yag.settings.controller.<ControllerName>.<actionName>.template
-		$templatePathAndFilename = $this->settings['controller'][$this->request->getControllerName()][$this->request->getControllerActionName()]['template'];
+		if($this->configurationBuilder) {
+			$templatePathAndFilename = $this->configurationBuilder->buildThemeConfiguration()->getTemplate($this->request->getControllerName(), $this->request->getControllerActionName());	
+		}
+
+		if(!$templatePathAndFilename) $templatePathAndFilename = $this->settings['controller'][$this->request->getControllerName()][$this->request->getControllerActionName()]['template'];
 	
 		if (isset($templatePathAndFilename) && strlen($templatePathAndFilename) > 0) {
 			if (file_exists(t3lib_div::getFileAbsFileName($templatePathAndFilename))) {

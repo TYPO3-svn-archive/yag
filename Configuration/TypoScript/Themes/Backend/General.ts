@@ -17,5 +17,21 @@ plugin.tx_yag.settings.themes.backend {
 			width = 64
 			height = 64
 		}
+		
+		thumb {
+			width = 120
+			height = 113
+		}
+	}
+	
+	controller {
+		ItemList {
+			list.template = EXT:yag/Resources/Private/Templates/ItemList/ItemAdminList.html
+		}
+		
+		Gallery {
+			index.template = EXT:yag/Resources/Private/Templates/Gallery/BackendIndex.html
+			list.template = EXT:yag/Resources/Private/Templates/Gallery/BackendList.html
+		}
 	}
 }

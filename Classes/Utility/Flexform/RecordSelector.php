@@ -126,9 +126,11 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 
 		$pageRenderer = $doc->getPageRenderer();
 		
+		$compress = true;
+		
 		// Jquery
-		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/Js/JQuery/jquery-1.4.4.min.js', 'text/javascript', $compress);
-		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/Js/JQuery/jquery-ui-1.8.7.custom.min.js', 'text/javascript', $compress);
+		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/Js/JQuery/jquery-1.5.1.min.js', 'text/javascript', $compress);
+		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/Js/JQuery/jquery-ui-1.8.10.custom.min.js', 'text/javascript', $compress);
 		
 		$pageRenderer->addCssFile($baseUrl . 'Resources/Public/CSS/JQuery/base.css', 'stylesheet', 'all', '', $compress);
 		$pageRenderer->addCssFile($baseUrl . 'Resources/Public/CSS/JQuery/ui-lightness/jquery-ui-1.8.7.custom.css', 'stylesheet', 'all', '', $compress);
@@ -156,11 +158,32 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 	
 	
 	/**
+	 * get the current pid
+	 * 
+	 */
+	protected function getCurrentPID($pid = 0) {
+		if($pid > 0) return $pid;
+		
+		$pid = (int) $config['row']['pid'];
+		if($pid > 0) return $pid;
+		
+		$pid = t3lib_div::_GP('PID');
+		if($pid > 0) return $pid;
+		
+		// UUUUhh !!
+		$returnUrlArray = explode('id=', t3lib_div::_GP('returnUrl'));
+		$pid = (int) array_pop($returnUrlArray); 
+		return $pid;
+	}
+	
+	
+	
+	/**
 	 * Get Album List as JSON 
 	 */
 	public function getAlbumSelectList() {
 		
-		$this->init(t3lib_div::_GP('PID'));
+		$this->init($this->getCurrentPID());
 		
 		$galleryRepository = $this->objectManager->get('Tx_Yag_Domain_Repository_GalleryRepository');
 		
@@ -188,7 +211,7 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 	 */
 	public function getImageSelectList() {
 		
-		$this->init(t3lib_div::_GP('PID'));
+		$this->init($this->getCurrentPID());
 		
 		$albumRepository = $this->objectManager->get('Tx_Yag_Domain_Repository_AlbumRepository');
 		
@@ -218,7 +241,7 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 	 */
 	public function renderAlbumSelector(&$PA, &$fobj) {
 		
-		$this->init($PA['row']['pid']);
+		$this->init($this->getCurrentPID($PA['row']['pid']));
 		
 		$PA['elementID'] = 'field_' . md5($PA['itemFormElID']);
 		$selectedAlbumUid = (int) $PA['itemFormElValue'];
@@ -234,9 +257,11 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 				/* @var $selectedAlbum Tx_Yag_Domain_Model_Album */
 				$selectedGalleries = $selectedAlbum->getGalleries();
 				$selectedGallery = $selectedGalleries->current();
+				
+				if($selectedGallery) {
+					$albums = $selectedGallery->getAlbums();	
+				}
 			}
-			
-			$albums = $selectedGallery->getAlbums();
 		}
 		
 		
@@ -269,7 +294,7 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 	 */
 	public function renderGallerySelector(&$PA, &$fobj) {
 		
-		$this->init($PA['row']['pid']);
+		$this->init($this->getCurrentPID($PA['row']['pid']));
 		
 		$PA['elementID'] = 'field_' . md5($PA['itemFormElID']);
 		
@@ -331,14 +356,14 @@ class user_Tx_Yag_Utility_Flexform_RecordSelector {
 				$selectedGalleries = $selectedAlbum->getGalleries();
 				/* @var $selectedGallery Tx_Yag_Domain_Model_Gallery */
 				$selectedGallery = $selectedGalleries->current();
+			
+				$renderer->assign('selectedImage', $selectedImage);	
+				$renderer->assign('selectedAlbum', $selectedAlbum);	
+				$renderer->assign('selectedGallery', $selectedGallery);	
+				
+				$renderer->assign('albums', $selectedGallery->getAlbums());
+				$renderer->assign('images', $selectedAlbum->getItems());
 			}
-			
-			$renderer->assign('selectedImage', $selectedImage);	
-			$renderer->assign('selectedAlbum', $selectedAlbum);	
-			$renderer->assign('selectedGallery', $selectedGallery);	
-			
-			$renderer->assign('albums', $selectedGallery->getAlbums());
-			$renderer->assign('images', $selectedAlbum->getItems());
 		}
 		
 		$renderer->assign('galleries', $galleries);

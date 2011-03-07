@@ -33,25 +33,29 @@
 
 if (!defined ('TYPO3_MODE')) 	die ('Access denied.');
 
+
+/*
+ * Main (uncached) plugin
+ */
 Tx_Extbase_Utility_Extension::configurePlugin(
 	$_EXTKEY,
 	'Pi1',
 	array(
-		'Album' => 'show, new, create, edit, update, delete, addItems',
+		'Album' => 'show, showSingle, new, create, edit, update, delete, addItems',
 	    'MultifileUpload' => 'showUploadForm, upload',
-		'Gallery' => 'list, index, show, new, create, edit, update, delete',
-		'Item' => 'index, show, new, create, edit, update, delete',
+		'Gallery' => 'list, showSingle, index, show, new, create, edit, update, delete',
+		'Item' => 'index, show, showSingle, new, create, edit, update, delete',
 		'ItemList' => 'list',
-	    'ItemAdminList' => 'list',
 		'ItemFile' => 'index, show, new, create, edit, update, delete',
 		'DirectoryImport' => 'showImportForm, importFromDirectory',
 	    'ZipImport' => 'showImportForm, importFromZip, createNewAlbumAndImportFromZip',
-		'Development' => 'createSampleData, deleteAll,testExif',
 	    'Remote' => 'addItemToAlbum, albumList, galleryList',
-	    'Ajax' => 'updateGallerySorting,directoryAutoComplete,deleteItem,updateItemTitle,setItemAsAlbumThumb,updateItemDescription,updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty,setAlbumAsGalleryThumb',
-	    'AjaxEditing' => 'index',
+	    'Ajax' => 'updateItemSorting,updateGallerySorting,directoryAutoComplete,deleteItem,updateItemTitle,setItemAsAlbumThumb,updateItemDescription,
+	        updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty,setAlbumAsGalleryThumb,
+	        hideAlbum,unhideAlbum,deleteGallery,deleteAlbum',
 	    'Setup' => 'index, setupRbac,truncateTables',
-	    'AdminMenu' => 'index'
+	    'AdminMenu' => 'index',
+	    'Error' => 'index',
 	),
 	array(
         'Album' => 'show, new, create, edit, update, delete, addItems',
@@ -62,15 +66,29 @@ Tx_Extbase_Utility_Extension::configurePlugin(
 		'DirectoryImport' => 'showImportForm, importFromDirectory',
         'ZipImport' => 'showImportForm, importFromZip, createNewAlbumAndImportFromZip',
 		'Remote' => 'addItemToAlbum, albumList, galleryList',
-        'Development' => 'createSampleData, deleteAll, testExif',
-        'Ajax' => 'updateGallerySorting,directoryAutoComplete,deleteItem,updateItemTitle,setItemAsAlbumThumb,updateItemDescription,updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty,setAlbumAsGalleryThumb',
+        'Ajax' => 'updateItemSorting,updateGallerySorting,directoryAutoComplete,deleteItem,updateItemTitle,setItemAsAlbumThumb,updateItemDescription,
+            updateAlbumSorting,updateAlbumTitle,updateAlbumDescription,updateGenericProperty,setAlbumAsGalleryThumb,
+            hideAlbum,unhideAlbum,deleteGallery,deleteAlbum',
 		'ItemList' => 'list',
-        'ItemAdminList' => 'list',
-        'AjaxEditing' => 'index',
         'Setup' => 'index, setupRbac,truncateTables',
-        'AdminMenu' => 'index'
+        'AdminMenu' => 'index',
+		'Error' => 'index',
 	)
 );
+
+
+
+/*
+ * Special plugin mode for XML export of list data
+ */
+Tx_Extbase_Utility_Extension::configurePlugin(
+	$_EXTKEY,
+	'XMLList',
+	array('ItemList' => 'xmlList'),
+	array()
+);
+
+
 
 if(TYPO3_MODE == 'BE') {
 	// Flexform typoScript data provider

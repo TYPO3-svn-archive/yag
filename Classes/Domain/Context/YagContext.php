@@ -122,6 +122,11 @@ class Tx_Yag_Domain_Context_YagContext implements Tx_PtExtlist_Domain_StateAdapt
 	protected $selectedAlbumUid;
 	
 	
+	/**
+	 * @var integer
+	 */
+	protected $selectedItemUid;
+	
 	
 	/** 
 	 * @var string $identifer
@@ -158,6 +163,17 @@ class Tx_Yag_Domain_Context_YagContext implements Tx_PtExtlist_Domain_StateAdapt
 	}
 	
 	
+	
+	/**
+	 * Return context identifier
+	 * 
+	 */
+	public function getIdentifier() {
+		return $this->identifier;
+	}
+	
+	
+	
 	/**
 	 * Main init method
 	 * 
@@ -176,6 +192,7 @@ class Tx_Yag_Domain_Context_YagContext implements Tx_PtExtlist_Domain_StateAdapt
 	protected function initByConfiguration() {
 		$this->selectedGalleryUid = $this->configurationBuilder->buildGalleryConfiguration()->getSelectedGalleryUid();
 		$this->selectedAlbumUid = $this->configurationBuilder->buildAlbumConfiguration()->getSelectedAlbumUid();
+		$this->selectedItemUid = $this->configurationBuilder->buildItemConfiguration()->getSelectedItemUid();
 	}
 	
 	
@@ -261,9 +278,18 @@ class Tx_Yag_Domain_Context_YagContext implements Tx_PtExtlist_Domain_StateAdapt
 	}
 	
 	
+	/**
+	 * @param Tx_Yag_Domain_Model_Item $item
+	 */
+	public function setItem(Tx_Yag_Domain_Model_Item $item) {
+		$this->selectedItem = $item;
+		$this->selectedItemUid = $item->getUid();
+	}
+	
+	
 	
 	/**
-	 * @param integer $albumUid
+	 * @param int $albumUid
 	 */
 	public function setAlbumUid($albumUid) {
 		$this->selectedAlbumUid = $albumUid;
@@ -272,10 +298,19 @@ class Tx_Yag_Domain_Context_YagContext implements Tx_PtExtlist_Domain_StateAdapt
 	
 	
 	/**
-	 * @param integer $galleryUid
+	 * @param int $galleryUid
 	 */
 	public function setGalleryUid($galleryUid) {
 		$this->selectedGalleryUid = $galleryUid;
+	}
+	
+	
+	
+	/**
+	 * @param int $itemUid
+	 */
+	public function setItemUid($itemUid) {
+		$this->selectedItemUid = $itemUid;
 	}
 	
 	
@@ -293,6 +328,9 @@ class Tx_Yag_Domain_Context_YagContext implements Tx_PtExtlist_Domain_StateAdapt
 	 * @return Tx_Yag_Domain_Model_Gallery
 	 */
 	public function getSelectedGallery() {
+		
+		if(!$this->selectedGalleryUid) return NULL;
+		
 		if(is_a($this->selectedGallery, 'Tx_Yag_Domain_Model_Gallery') && $this->selectedGallery->getUid() == $this->selectedGalleryUid) {
 			return $this->selectedGallery;
 		} else {
@@ -306,10 +344,29 @@ class Tx_Yag_Domain_Context_YagContext implements Tx_PtExtlist_Domain_StateAdapt
 	 * @return Tx_Yag_Domain_Model_Album
 	 */
 	public function getSelectedAlbum() {
+		
+		if(!$this->selectedAlbumUid) return NULL;
+		
 		if(is_a($this->selectedAlbum, 'Tx_Yag_Domain_Model_Album') && $this->selectedAlbum->getUid() == $this->selectedAlbumUid) {
 			return $this->selectedAlbum;
 		} else {
 			return t3lib_div::makeInstance('Tx_Yag_Domain_Repository_AlbumRepository')->findByUid($this->selectedAlbumUid);
+		}
+	}
+	
+	
+	
+	/**
+	 * @return Tx_Yag_Domain_Model_Item
+	 */
+	public function getSelectedItem() {
+		
+		if(!$this->selectedItemUid) return NULL;
+		
+		if(is_a($this->selectedItem, 'Tx_Yag_Domain_Model_Item') && $this->selectedItem->getUid() == $this->selectedItemUid) {
+			return $this->selectedItem;
+		} else {
+			return t3lib_div::makeInstance('Tx_Yag_Domain_Repository_ItemRepository')->findByUid($this->selectedItemUid);
 		}
 	}
 	
@@ -322,8 +379,8 @@ class Tx_Yag_Domain_Context_YagContext implements Tx_PtExtlist_Domain_StateAdapt
 	 */
 	public function getItemlistContext() {
 		return Tx_PtExtlist_ExtlistContext_ExtlistContextFactory::getContextByCustomConfiguration(
-			    $this->configurationBuilder->buildExtlistConfiguration()->getExtlistSettingsByListId(self::ITEM_LIST_ID), 
-			    self::ITEM_LIST_ID . $this->identifier);
+		    $this->configurationBuilder->buildExtlistConfiguration()->getExtlistSettingsByListId(self::ITEM_LIST_ID), 
+		    self::ITEM_LIST_ID . $this->identifier);
 	}
 	
 	

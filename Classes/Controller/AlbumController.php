@@ -61,6 +61,11 @@ class Tx_Yag_Controller_AlbumController extends Tx_Yag_Controller_AbstractContro
 			
 		if ($album === null) {
 			$album = $this->yagContext->getSelectedAlbum();
+			
+			if($album == NULL) {
+				$this->flashMessageContainer->add(Tx_Extbase_Utility_Localization::translate('tx_yag_controller_album.noAlbumSelected', $this->extensionName),'',t3lib_FlashMessage::ERROR);
+				$this->forward('index', 'Error');			
+			}
 		} else {
 			$this->yagContext->setAlbum($album);
 		}
@@ -68,6 +73,17 @@ class Tx_Yag_Controller_AlbumController extends Tx_Yag_Controller_AbstractContro
 		$extListDataBackend = $this->yagContext->getItemlistContext()->getDataBackend(); 
     	$extListDataBackend->getPagerCollection()->reset();
 		$this->forward('list', 'ItemList');
+	}
+	
+	
+	/**
+	 * Entry point for specific album mode 
+	 * 
+	 */
+	public function showSingleAction() {
+		$albumUid = $this->configurationBuilder->buildAlbumConfiguration()->getSelectedAlbumUid();
+		$this->yagContext->setAlbumUid($albumUid);
+		$this->forward('show');
 	}
 	
 	
@@ -109,6 +125,9 @@ class Tx_Yag_Controller_AlbumController extends Tx_Yag_Controller_AbstractContro
 
         if ($gallery != NULL) {
             $gallery->addAlbum($newAlbum);
+        } else {
+        	// gallery has been set by editing form
+        	$gallery = $newAlbum->getGalleries()->current();
         }
         
         $this->flashMessageContainer->add('Your new album was created.'); // TODO translation
@@ -131,23 +150,15 @@ class Tx_Yag_Controller_AlbumController extends Tx_Yag_Controller_AbstractContro
      * @rbacObject Album
      * @rbacAction delete
      */
-    public function deleteAction(Tx_Yag_Domain_Model_Album $album, $reallyDelete = false) {
-     
-        if ($album != null) {
-        	$this->view->assign('album', $album);
-        	
-        	if ($reallyDelete) {
-        		$this->flashMessageContainer->add(Tx_Extbase_Utility_Localization::translate('tx_yag_controller_album.albumSuccessfullyDeleted', $this->extensionName, array($album->getName())));
-        		$album->delete();
-        		$this->redirect('index', 'Gallery');
-        	} 
-        	
-        } else {
-        	 $this->flashMessageContainer->add(Tx_Extbase_Utility_Localization::translate('tx_yag_controller_album.albumWithUIDNotFound', $this->extensionName, array($album->getUid())),'',
-        										t3lib_FlashMessage::ERROR);
-        	$this->redirect('index', 'Gallery');
-        }
-    	
+    public function deleteAction(Tx_Yag_Domain_Model_Album $album) {
+    	$gallery = $album->getGalleries()->current();
+        $album->delete();
+        $this->flashMessageContainer->add(
+            Tx_Extbase_Utility_Localization::translate('tx_yag_controller_album.deletesuccessfull', $this->extensionName),
+            '', 
+            t3lib_FlashMessage::OK
+        );
+        $this->redirect('index', 'Gallery', null, array('gallery' => $gallery));
     }
     
     

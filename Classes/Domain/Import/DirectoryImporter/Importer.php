@@ -96,10 +96,13 @@ class Tx_Yag_Domain_Import_DirectoryImporter_Importer extends Tx_Yag_Domain_Impo
 			$item = null;
 			if ($this->moveFilesToOrigsDirectory) {
 				$item = $this->getNewPersistedItem();
+				// set title of item to filename
+				$item->setTitle(basename($filepath));
 				$filepath = $this->moveFileToOrigsDirectory($filepath, $item);
 			}
             $this->importFileByFilename($filepath, $item);
 		}
+		$this->runPostImportAction();
 	}
 	
 }

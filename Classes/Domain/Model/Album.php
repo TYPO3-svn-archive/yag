@@ -105,6 +105,18 @@ class Tx_Yag_Domain_Model_Album extends Tx_Extbase_DomainObject_AbstractEntity {
     protected $items;
     
     
+    
+    /**
+     * If set to 1, album will be hidden in frontend
+     * 
+     * ATTENTION We do not use T3's hidden field here, 
+     * as this leeds to problems with everything.
+     *
+     * @var int
+     */
+    protected $hide;
+    
+    
 
     /**
      * The constructor.
@@ -367,6 +379,28 @@ class Tx_Yag_Domain_Model_Album extends Tx_Extbase_DomainObject_AbstractEntity {
     
     
     
+    /**
+     * Setter for hidden property. If set to 1, album won't be displayed in frontend
+     *
+     * @param int $hide
+     */
+    public function setHide($hide) {
+    	$this->hide = $hide;
+    }
+    
+    
+    
+    /**
+     * Getter for hidden property. If set to 1, album won't be displayed in frontend.
+     *
+     * @return int
+     */
+    public function getHide() {
+    	return $this->hide;
+    }
+    
+    
+    
     /***********************************************************************
      * Here are our methods
      ***********************************************************************/
@@ -411,6 +445,25 @@ class Tx_Yag_Domain_Model_Album extends Tx_Extbase_DomainObject_AbstractEntity {
 		if (count($this->items) > 0) {
 		    $this->thumb = $this->items->current();
 		}
+	}
+	
+	
+	
+	/**
+	 * Returns 1 if album is album thumb for any gallery associated with this album
+	 * 
+	 * TODO we have to change this, whenever we want to use gallery:album n:m relation
+	 *
+	 * @return int 1 if album is gallery thumb, 0 else
+	 */
+	public function getIsGalleryThumb() {
+		$isGalleryThumb = 0;
+		foreach ($this->galleries as $gallery) { /* @var $gallery Tx_Yag_Domain_Model_Gallery */ 
+			if (!is_null($gallery->getThumbAlbum()) && $gallery->getThumbAlbum()->getUid() == $this->uid) {
+				$isGalleryThumb = 1;
+			}
+		}
+		return $isGalleryThumb;
 	}
 	
 }

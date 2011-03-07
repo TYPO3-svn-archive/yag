@@ -1,5 +1,4 @@
 <?php
-
 /***************************************************************
 *  Copyright notice
 *
@@ -56,6 +55,9 @@ class Tx_Yag_Controller_ItemController extends Tx_Yag_Controller_AbstractControl
 	/**
 	 * Display image
 	 * 
+	 * Do not change this to item, as it is the UID of the item in the list,
+	 * which is not the UID of the domain object!
+	 * 
 	 * @param int $itemUid
 	 */
 	public function showAction($itemUid = NULL) {
@@ -95,30 +97,44 @@ class Tx_Yag_Controller_ItemController extends Tx_Yag_Controller_AbstractControl
 	
 	
 	/**
+	 * Show a single (flexform defined) image
+	 * 
+	 * @param Tx_Yag_Domain_Model_Item $item
+	 */
+	public function showSingleAction(Tx_Yag_Domain_Model_Item $item = NULL) {
+		
+		if($item === NULL) {
+			$itemUid = $this->configurationBuilder->buildItemConfiguration()->getSelectedItemUid();
+			$this->yagContext->setItemUid($itemUid);
+			$item = $this->yagContext->getSelectedItem();
+			
+			if($item === NULL) {
+				$this->flashMessageContainer->add(Tx_Extbase_Utility_Localization::translate('tx_yag_controller_item.noItemSelected', $this->extensionName),'',t3lib_FlashMessage::ERROR);
+				$this->forward('index', 'Error');	
+			}
+		}
+		
+		$this->view->assign('item', $item);
+	}
+	
+	
+	
+	/**
 	 * Action for deleting an item
 	 *
-	 * @param int $itemUid UID of item that should be deleted
-	 * @param bool $reallyDelete
+	 * @param Tx_Yag_Domain_Model_Item $item Item to be deleted
+	 * @param Tx_Yag_Domain_Model_Album $album Album to forward to
 	 * @return string Rendered delete action
 	 * @rbacNeedsAccess
 	 * @rbacObject Item
 	 * @rbacAction delete
 	 */
-	public function deleteAction($itemUid = NULL, $reallyDelete = false) {
-		$item = $this->itemRepository->findByUid($itemUid); /* @var $item Tx_Yag_Domain_Model_Item */
-		if ($itemUid == null || !is_a($item, 'Tx_Yag_Domain_Model_Item')) {
-			// No correct item UID is given
-			$this->view->assign('noCorrectItemUid', 1);
-			return $this->view->render();
-		} else {
-			// Correct item is given
-			$this->view->assign('item', $item);
-			if ($reallyDelete) {
-				// Really delete item
-		        $item->delete();
-            	$this->view->assign('deleted', 1);
-			}
-		}
+	public function deleteAction(Tx_Yag_Domain_Model_Item $item, Tx_Yag_Domain_Model_Album $album = null) {
+        $item->delete();
+        if ($album) {
+        	$this->yagContext->setAlbum($album);
+        }
+        $this->forward('list', 'ItemList');
 	}
 	
 }
